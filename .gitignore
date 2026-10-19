@@ -1,0 +1,17 @@
+# Temporary / backup directories
+backup_before/
+test_java/
+
+# Neovim swap & backup files
+*.swp
+*.swo
+*~
+*.bak
+
+# Logs
+*.log
+
+# OS generated files
+Thumbs.db
+desktop.ini
+.DS_Store
