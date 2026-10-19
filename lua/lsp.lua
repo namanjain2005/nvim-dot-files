@@ -114,6 +114,44 @@ vim.filetype.add({
     },
 })
 
+-- Go LSP (gopls)
+vim.lsp.config("gopls", {
+    cmd = { "gopls" },
+    filetypes = { "go", "gomod", "gowork", "gotmpl" },
+    root_markers = {
+        "go.work",
+        "go.mod",
+        ".git",
+    },
+    settings = {
+        gopls = {
+            analyses = {
+                unusedparams = true,
+            },
+            staticcheck = true,
+            gofumpt = true,
+        },
+    },
+})
+
+vim.lsp.enable("gopls")
+
+-- Python LSP (pyright)
+vim.lsp.config("pyright", {
+    cmd = { "pyright-langserver.cmd", "--stdio" },
+    filetypes = { "python" },
+    root_markers = {
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "requirements.txt",
+        "Pipfile",
+        ".git",
+    },
+})
+
+vim.lsp.enable("pyright")
+
 local jdtls_dir = vim.fn.expand("~/AppData/Local/jdtls")
 local java_bin = "C:/Program Files/Eclipse Adoptium/jdk-25.0.2.10-hotspot/bin/java.exe"
 if vim.fn.filereadable(java_bin) == 0 then
@@ -159,4 +197,25 @@ vim.lsp.config("jdtls", {
     },
 })
 
-vim.lsp.enable("jdtls")
+vim.lsp.enable("jdtls")
+
+-- Support reading decompiled / library source files for Java definitions (jdt:// URIs)
+vim.api.nvim_create_autocmd("BufReadCmd", {
+    pattern = "jdt://*",
+    callback = function(args)
+        local client = vim.lsp.get_clients({ name = "jdtls" })[1]
+        if not client then
+            return
+        end
+        client:request("java/classFileContents", { uri = args.match }, function(err, content)
+            if err or not content then
+                return
+            end
+            vim.api.nvim_buf_set_lines(args.buf, 0, -1, false, vim.split(content, "\n"))
+            vim.bo[args.buf].modifiable = false
+            vim.bo[args.buf].readonly = true
+            vim.bo[args.buf].filetype = "java"
+            vim.bo[args.buf].buftype = "nofile"
+        end, args.buf)
+    end,
+})
