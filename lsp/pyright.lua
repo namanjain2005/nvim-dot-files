@@ -9,4 +9,5 @@ return {
     "Pipfile",
     ".git",
   },
+  single_file_support = true,
 }

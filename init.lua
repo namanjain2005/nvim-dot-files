@@ -15,10 +15,13 @@ require("config.completion").setup()
 require("config.clangd").setup()
 require("config.gdscript").setup()
 
--- .gd is detected by Neovim's runtime; these cover the project files.
+-- .gd is detected by Neovim's runtime; these cover the project files on
+-- versions that do not know them yet.
 vim.filetype.add({
   extension = {
     gd = "gdscript",
     gdshader = "gdshader",
+    cu = "cuda",
+    cuh = "cuda",
   },
 })

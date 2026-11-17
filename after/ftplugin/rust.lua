@@ -8,7 +8,7 @@ vim.bo.softtabstop = 4
 vim.bo.textwidth = 100
 vim.bo.suffixesadd = ".rs"
 
-pcall(vim.cmd.compiler, "cargo")
+pcall(vim.cmd, "compiler cargo")
 
 local function map(lhs, rhs, desc)
   vim.keymap.set("n", lhs, rhs, { buffer = true, silent = true, desc = desc })

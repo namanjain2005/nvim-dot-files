@@ -19,16 +19,37 @@ lsp.config("*", {
   },
 })
 
-lsp.enable("rust_analyzer")
--- Keep the local JDTLS launcher settings ahead of nvim-jdtls's default
--- `cmd = { "jdtls" }`, since this setup launches the installed bundle directly.
-lsp.config("jdtls", dofile(vim.fn.stdpath("config") .. "/lsp/jdtls.lua"))
-lsp.enable("jdtls")
--- gdscript is enabled on demand by config.gdscript (Godot must be running).
+-- Enable a server only when it can actually run, so a fresh clone does not
+-- produce spawn errors for tools that have not been installed yet.
+local function enable_if(server, available)
+  if available then
+    lsp.enable(server)
+  end
+end
 
--- Additional language servers (enable when their binaries are available).
-lsp.enable("gopls")
-lsp.enable("pyright")
+local function executable(name)
+  return vim.fn.executable(name) == 1
+end
+
+enable_if("rust_analyzer", executable("rust-analyzer"))
+enable_if("gopls", executable("gopls"))
+enable_if("pyright", executable("pyright-langserver"))
+-- JDTLS can be a bundle in ~/.local/share/jdtls or a `jdtls` executable.
+local has_java = executable("java")
+  or executable(vim.fn.expand("~/.local/jdk-25/bin/java"))
+  or executable(vim.fn.expand("~/.local/jdk-21/bin/java"))
+  or executable(vim.fn.expand("~/.local/jdk-17/bin/java"))
+local has_jdtls = executable("jdtls")
+  or vim.fn.isdirectory(vim.fn.expand("~/.local/share/jdtls")) == 1
+
+if has_jdtls and has_java then
+  -- Set this explicitly so plugins that also ship lsp/jdtls.lua (such as
+  -- nvim-jdtls) cannot override the launcher below.
+  lsp.config("jdtls", dofile(vim.fn.stdpath("config") .. "/lsp/jdtls.lua"))
+  lsp.enable("jdtls")
+end
+-- gdscript is enabled on demand by config.gdscript (Godot must be running).
+-- clangd is enabled on demand by config.clangd when the binary exists.
 
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
