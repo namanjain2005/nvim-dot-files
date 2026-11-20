@@ -37,6 +37,17 @@ map("n", "<leader>dt", function()
 end, { desc = "Toggle diagnostics" })
 
 -- LSP (grn/gra/grr/K/[d/]d already exist in Neovim 0.11+).
+-- Go to definition: use the LSP when one supports it, otherwise keep Vim's
+-- built-in local declaration search (useful before a server attaches or when
+-- the server for the language is not installed).
+map("n", "gd", function()
+  if #vim.lsp.get_clients({ bufnr = 0, method = "textDocument/definition" }) > 0 then
+    vim.lsp.buf.definition()
+  else
+    vim.cmd("normal! gd")
+  end
+end, { desc = "Go to definition" })
+
 map("n", "<leader>lf", function()
   vim.lsp.buf.format({ async = true })
 end, { desc = "Format buffer" })

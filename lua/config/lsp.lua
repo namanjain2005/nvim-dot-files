@@ -32,8 +32,24 @@ local function executable(name)
 end
 
 enable_if("rust_analyzer", executable("rust-analyzer"))
-enable_if("gopls", executable("gopls"))
 enable_if("pyright", executable("pyright-langserver"))
+
+-- gopls is often installed by `go install`, which puts it in ~/go/bin. That
+-- directory is not always on PATH, so look there explicitly.
+local gopls = vim.fn.exepath("gopls")
+if gopls == "" then
+  for _, candidate in ipairs({ "~/go/bin/gopls", "~/.local/bin/gopls" }) do
+    local path = vim.fn.expand(candidate)
+    if executable(path) then
+      gopls = path
+      break
+    end
+  end
+end
+if gopls ~= "" then
+  lsp.config("gopls", { cmd = { gopls } })
+  lsp.enable("gopls")
+end
 -- JDTLS can be a bundle in ~/.local/share/jdtls or a `jdtls` executable.
 local has_java = executable("java")
   or executable(vim.fn.expand("~/.local/jdk-25/bin/java"))

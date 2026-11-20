@@ -28,11 +28,18 @@ its executable is available.
 | --- | --- | --- |
 | Rust | `rust-analyzer` | `rustup component add rust-analyzer` |
 | C / C++ / CUDA | `clangd` | distro package, or `conda install -c conda-forge clang-tools` |
-| Go | `gopls` | `go install golang.org/x/tools/gopls@latest` |
+| Go | `gopls` | `go install golang.org/x/tools/gopls@v0.15.3` (use a newer tag with newer Go) |
 | Python | `pyright-langserver` | `npm install -g pyright` |
 | Java | JDTLS bundle | unpack a snapshot into `~/.local/share/jdtls` |
 | GDScript | Godot 4 editor LSP | open the project in the Godot editor |
 | GDScript lint/format | `gdlint`, `gdformat` | `pipx install gdtoolkit` |
+
+The config finds `gopls` on `PATH` as well as in `~/go/bin` and
+`~/.local/bin`, so `go install` works even when `~/go/bin` is not exported.
+
+If Go `gd` falls back to Vim's built-in search instead of jumping to the
+definition, the server is not attached. Run `:checkhealth vim.lsp` and
+`gopls version` to confirm the install, then reopen the buffer.
 
 ### Java/JDTLS
 
